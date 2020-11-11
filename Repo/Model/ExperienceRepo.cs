@@ -42,7 +42,9 @@ namespace Repo.Model
 
         public bool IsExists(int id)
         {
-            throw new NotImplementedException();
+            //lambda expression: left side is a temporary variable to store the preceding object, on the right we manipulate this objetcs properties, methods, etc.
+            var exists = _db.Experiences.Any(q => q.Id == id);
+            return exists;
         }
 
         public bool Save()

@@ -28,11 +28,6 @@ namespace Website.Controllers
             return View(model);
         }
 
-        // GET: Experience/Details/5
-        public ActionResult Details(int id)
-        {
-            return View();
-        }
 
         // GET: Experience/Create
         public ActionResult Create()
@@ -74,20 +69,39 @@ namespace Website.Controllers
         // GET: Experience/Edit/5
         public ActionResult Edit(int id)
         {
-            return View();
+
+            if (!_repo.IsExists(id))
+                return NotFound();
+
+            var experience = _repo.FindById(id);
+            var model = _mapper.Map<ExperienceVM>(experience);
+            return View(model);
         }
 
         // POST: Experience/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit(int id, IFormCollection collection)
+        public ActionResult Edit(ExperienceVM model)
         {
             try
             {
+                if (!ModelState.IsValid)
+                    return View(model);
+                var experience = _mapper.Map<Experience>(model);
+                var updated = _repo.Update(experience);
+
+                if (!updated)
+                {
+                    ModelState.AddModelError("", "Something went wrong");
+                    return View();
+                }
+
                 return RedirectToAction(nameof(Index));
+
             }
             catch
             {
+                ModelState.AddModelError("", "Something went wrong");
                 return View();
             }
         }
@@ -95,11 +109,20 @@ namespace Website.Controllers
         // GET: Experience/Delete/5
         public ActionResult Delete(int id)
         {
-            return View();
+            if (!_repo.IsExists(id))
+                return NotFound();
+
+            var experience = _repo.FindById(id);
+            var deleted = _repo.Delete(experience);
+
+            if (!deleted)
+                return BadRequest();
+
+            return RedirectToAction(nameof(Index));
         }
 
-        // POST: Experience/Delete/5
-        [HttpPost]
+            // POST: Experience/Delete/5
+            [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Delete(int id, IFormCollection collection)
         {
